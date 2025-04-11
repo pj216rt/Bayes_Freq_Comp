@@ -214,3 +214,43 @@ curve(dnorm(x, mean = 0, sd = sqrt(tau + sigma)),
       col = "red", lwd = 2, add = TRUE)
 legend("topright", legend = c("Empirical", "Theoretical"),
        fill = c("skyblue", NA), border = NA, lty = c(NA, 1), col = c("skyblue", "red"))
+
+
+
+#Example 3.4
+simulat_neyman_scott <- function(n=100, sigma2_true=2){
+  #generate mu_i
+  mu <- rnorm(n, mean = 0, sd=1)
+  
+  #observations X_ij
+  x1 <- rnorm(n, mean = mu, sd = sqrt(sigma2_true))
+  x2 <- rnorm(n, mean = mu, sd = sqrt(sigma2_true))
+  
+  #compute mle 
+  sigma2_mle <- (1/(4*n))*sum((x1 - x2)^2)
+  return(sigma2_mle)
+}
+
+
+#run simulations of this
+n_groups <- 1000   
+sigma2_true <- 2
+n_reps_3.4 <- 100000
+
+mle_NS_estimates <- replicate(n_reps_3.4, simulat_neyman_scott(n=n_groups, sigma2_true = sigma2_true))
+
+#summary
+mean_mle <- mean(mle_NS_estimates)
+bias <- mean_mle - sigma2_true
+
+cat("True sigma2:", sigma2_true, "\n")
+cat("Mean of MLE estimates:", round(mean_mle, 4), "\n")
+cat("Bias:", round(bias, 4), "\n")
+
+#plot this
+hist(mle_NS_estimates, breaks = 50, col = "skyblue", probability = TRUE,
+     main = expression(paste("Sampling Distribution of ", hat(sigma)^2, " MLE")),
+     xlab = expression(hat(sigma)^2),
+     xlim = c(0.5,2.5))
+abline(v = sigma2_true, col = "red", lwd = 2, lty = 2)
+legend("topright", legend = c("True Sigma2"), col = "red", lty = 2, lwd = 2)
